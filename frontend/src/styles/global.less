@@ -1,0 +1,734 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f5f5f5;
+  color: #333;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.page-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+  p {
+    color: #888;
+    margin-top: 4px;
+    font-size: 14px;
+  }
+}
+
+// ===== Textbook-style article with pinyin above each character =====
+.textbook-article {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 32px 36px;
+}
+
+.textbook-toolbar {
+  margin-bottom: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.textbook-para {
+  text-align: justify;
+  margin-bottom: 18px;
+  line-height: 2.6;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.textbook-char-cell {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: baseline;
+  margin: 0 1px;
+  min-width: 30px;
+}
+
+.textbook-py {
+  font-size: 11px;
+  color: #999;
+  line-height: 1.3;
+  white-space: nowrap;
+  font-weight: 400;
+  visibility: hidden;
+  transition: visibility 0.15s, opacity 0.15s ease-out;
+  opacity: 0;
+}
+
+// Pinyin visible states — prioritized by specificity
+.textbook-py-visible,
+.textbook-py-edited {
+  visibility: visible;
+  opacity: 1;
+}
+
+// Tap-reveal: pinyin pops in for the tapped character only
+.textbook-py-tap-reveal {
+  visibility: visible;
+  opacity: 1;
+  animation: py-pop-in 0.2s ease-out;
+}
+
+@keyframes py-pop-in {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// Hidden pinyin: preserve layout space but invisible
+.textbook-py-hidden {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.textbook-hz {
+  font-size: 22px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+// Visible pinyin: clickable hint for editing
+.textbook-py-visible {
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition: border-color 0.2s;
+  &:hover {
+    border-bottom-color: #bbb;
+    color: #666;
+  }
+}
+
+.textbook-py-edited {
+  color: #4F46E5;
+  border-bottom: 1px dotted #4F46E5;
+}
+
+.textbook-py-input {
+  width: 60px;
+  font-size: 11px;
+  padding: 0 2px;
+  height: 18px;
+  text-align: center;
+  border: 1px solid #4F46E5;
+  border-radius: 3px;
+  outline: none;
+  color: #333;
+  background: #fff;
+  font-family: inherit;
+}
+
+// Tap-to-speak pop-out animation — creates a "coming out of the page" effect
+.textbook-tap-flash {
+  animation: tap-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes tap-pop {
+  0% {
+    transform: scale(1.6) translateY(-4px);
+    background: #fff9c4;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 2;
+    position: relative;
+  }
+  40% {
+    transform: scale(1.5) translateY(-3px);
+    background: #fff9c4;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.14);
+    z-index: 2;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+.textbook-loading {
+  animation: load-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes load-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.textbook-char-highlight {
+  background: #d8f3dc;
+  color: #e65100;
+  border-radius: 3px;
+}
+
+.textbook-word-group {
+  display: inline;
+  border-bottom: 1.5px dashed #95d5b2;
+  padding-bottom: 1px;
+}
+
+.textbook-word-active {
+  border-bottom-color: #2d6a4f;
+  border-bottom-width: 2px;
+  padding-bottom: 0;
+}
+
+// Tiered character highlighting based on days since learned
+.char-tier-today {
+  background: #c8f7c5;
+  color: #bf360c;
+  border-radius: 4px;
+  padding: 1px 3px;
+  font-weight: 700;
+}
+
+.char-tier-recent {
+  background: #ffe0b2;
+  border-radius: 3px;
+  padding: 0 2px;
+  font-weight: 600;
+}
+
+.char-tier-older {
+  background: #e0e0e0;
+  border-radius: 3px;
+  padding: 0 2px;
+  color: #555;
+  font-style: italic;
+}
+
+// 侦查区 (Scout) 系统自动发现 — 浅灰色背景，与手动录入区分
+.char-tier-discovered {
+  background: #f0f0f0;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+// Active character ring when action bar is shown
+.char-active .textbook-hz {
+  outline: 2px solid #4F46E5;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+// Floating action bar — appears in toolbar when a character is tapped
+.char-action-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1.5px solid #4F46E5;
+  border-radius: 20px;
+  padding: 4px 6px 4px 14px;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+  animation: action-slide-in 0.25s ease-out;
+}
+
+@keyframes action-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.char-action-char {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.char-action-btn {
+  border: none;
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  &:active { transform: scale(0.95); }
+}
+
+.char-action-known {
+  background: #d8f3dc;
+  color: #2d6a4f;
+  &:hover { background: #b7e4c7; }
+}
+
+.char-action-forgotten {
+  background: #fff3e0;
+  color: #c62828;
+  &:hover { background: #ffe0b2; }
+}
+
+// Inline images within article
+.article-inline-img-wrapper {
+  text-align: center;
+  margin: 16px 0;
+}
+
+.article-inline-img-loading {
+  color: #bbb;
+  font-size: 13px;
+  padding: 24px 0;
+}
+
+.article-inline-img {
+  max-width: 80%;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.textbook-punct {
+  font-size: 22px;
+  margin: 0 2px;
+  color: #1a1a1a;
+  line-height: 1.4;
+  vertical-align: baseline;
+}
+
+// ===== Article cover image & child-friendly decoration =====
+.article-cover {
+  text-align: center;
+  margin-bottom: 20px;
+  border-radius: 14px;
+  overflow: hidden;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.article-cover-img-real {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+// Emoji-based cover — always visible, no loading
+.article-cover-emoji {
+  text-align: center;
+  padding: 32px 20px 24px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.article-cover-emoji-big {
+  font-size: 72px;
+  line-height: 1;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  animation: emoji-bounce 2s ease-in-out infinite;
+}
+
+@keyframes emoji-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.article-cover-emoji-topic {
+  font-size: 20px;
+  font-weight: 700;
+  color: #555;
+  letter-spacing: 4px;
+  margin-top: 4px;
+}
+
+.article-cover-emoji-stars {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.cover-sparkle {
+  display: inline-block;
+  animation: sparkle-fade 1.5s ease-in-out infinite;
+  opacity: 0.4;
+}
+
+@keyframes sparkle-fade {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+// Math character card variant
+.word-card-math {
+  border-color: #FA8C16;
+  &:hover {
+    border-color: #d46b08;
+    box-shadow: 0 2px 8px rgba(250, 140, 22, 0.2);
+  }
+}
+
+// Print styles
+@media print {
+  body {
+    background: #fff;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .textbook-article {
+    border: none;
+    padding: 0;
+  }
+  .textbook-para {
+    margin-bottom: 16px;
+  }
+  .textbook-hz,
+  .textbook-punct {
+    font-size: 22px;
+  }
+}
+
+// Mobile responsive
+@media (max-width: 768px) {
+  .textbook-article {
+    padding: 20px 12px;
+    border-radius: 0;
+    border: none;
+  }
+  .textbook-char-cell {
+    min-width: 24px;
+  }
+  .textbook-py {
+    font-size: 9px;
+  }
+  .textbook-hz,
+  .textbook-punct {
+    font-size: 18px;
+  }
+}
+
+// Word card grid
+.word-card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.word-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: #fff;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+
+  &:hover {
+    border-color: #4F46E5;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .char {
+    font-size: 32px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1;
+  }
+
+  .pinyin {
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+    line-height: 1;
+  }
+}
+
+// Forgotten level tags
+.level-active { color: #faad14; }
+.level-three { color: #ff7a45; }
+.level-five { color: #ff4d4f; }
+.level-learned { color: #52c41a; }
+
+// Print styles
+@media print {
+  body {
+    background: #fff;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .article-content {
+    font-size: 22px;
+    line-height: 2.5;
+  }
+}
+
+// ===== Article character review (by learn date) =====
+.review-date-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-date-group {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: #d9d9d9;
+  }
+}
+
+.review-date-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #555;
+}
+
+.review-date-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.review-date-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: #888;
+}
+
+.review-char-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.review-char-item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 68px;
+  height: 68px;
+  background: #fff;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 10px;
+  transition: all 0.2s;
+  cursor: default;
+
+  &:hover {
+    border-color: #4F46E5;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.12);
+  }
+}
+
+.review-char-hz {
+  font-size: 26px;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+
+.review-char-py {
+  font-size: 11px;
+  color: #999;
+  margin-top: 2px;
+  line-height: 1;
+}
+
+// ===== Immersive reading enhancements =====
+
+// 1A — Paragraph entrance animation
+.textbook-para {
+  opacity: 1;                 // 始终可读，不依赖 JS 触发
+  transform: translateY(12px);
+  transition: transform 0.4s ease-out;
+
+  // 第一次进入视口 → 浮上来 + 字色加深
+  &.para-visible {
+    transform: translateY(0);
+    .textbook-hz { color: #1a1a1a; }
+  }
+  // 已经读过但滚出视口 → 轻微淡化
+  &.para-seen {
+    opacity: 0.6;
+    transition: opacity 0.3s ease-out;
+  }
+}
+
+// 1C — Speaking glow ring when character is tapped
+.textbook-char-cell {
+  position: relative;
+  border-radius: 6px;
+}
+
+.textbook-speaking-glow {
+  animation: speaking-glow 0.55s ease-out;
+}
+
+@keyframes speaking-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.5), 0 0 0 0 rgba(79, 70, 229, 0.3);
+  }
+  40% {
+    box-shadow: 0 0 0 10px rgba(79, 70, 229, 0.15), 0 0 0 5px rgba(79, 70, 229, 0.25);
+  }
+  100% {
+    box-shadow: 0 0 0 20px rgba(79, 70, 229, 0), 0 0 0 10px rgba(79, 70, 229, 0);
+  }
+}
+
+// 1D — Reading progress bar
+.reading-progress-bar-container {
+  height: 6px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  margin-bottom: 12px;
+  overflow: visible;
+  position: relative;
+}
+
+.reading-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #95d5b2, #52c41a, #faad14, #ff7a45);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+  position: relative;
+  min-width: 0;
+}
+
+.reading-progress-milestone {
+  position: absolute;
+  top: -10px;
+  font-size: 14px;
+  transform: translateX(-50%);
+  animation: emoji-bounce 0.6s ease-out;
+  pointer-events: none;
+}
+
+// 2B — Ripple effect on character tap (pure CSS, via ::after)
+.textbook-char-cell.textbook-tap-flash::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(79, 70, 229, 0.4);
+  animation: ripple-out 0.55s ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple-out {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+// 2A — Celebration confetti overlay
+.celebration-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.celebration-particle {
+  position: absolute;
+  bottom: -20px;
+  animation: confetti-rise 2.5s ease-out forwards;
+}
+
+@keyframes confetti-rise {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+}
+
+// 2C — Read-aloud paragraph highlight
+.textbook-para-aloud {
+  background: rgba(255, 249, 196, 0.35);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-left: -12px;
+  margin-right: -12px;
+  transition: background 0.3s;
+
+  .textbook-hz {
+    color: #d46b08;
+    transition: color 0.15s;
+  }
+}
+
+// Mobile responsive
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px 12px;
+  }
+  .article-content {
+    font-size: 18px;
+    line-height: 2;
+    letter-spacing: 1px;
+  }
+  .word-card {
+    width: 64px;
+    height: 64px;
+    .char {
+      font-size: 26px;
+    }
+    .pinyin {
+      font-size: 10px;
+    }
+  }
+  .review-char-item {
+    width: 56px;
+    height: 56px;
+  }
+  .review-char-hz {
+    font-size: 22px;
+  }
+  .review-char-py {
+    font-size: 9px;
+  }
+}

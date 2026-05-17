@@ -1,0 +1,43 @@
+# Environment - contains API keys, NEVER commit
+.env
+.env.dev
+frontend/.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# Generated images
+backend/static/generated/
+
+# Misc
+*.log
+.claude/
+
+# Android / Capacitor
+frontend/android/build/
+frontend/android/app/build/
+frontend/android/local.properties
+frontend/android/.gradle/
+frontend/android/capacitor-cordova-android-plugins/build/
