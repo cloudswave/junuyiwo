@@ -1,6 +1,6 @@
 # 俊宜识字系统 — 单镜像（前后端 + MySQL）构建
 # Stage 1: 构建前端
-FROM node:20-bullseye AS frontend-builder
+FROM node:22-bookworm AS frontend-builder
 WORKDIR /frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
@@ -9,7 +9,8 @@ COPY frontend/ ./
 RUN npm run build
 
 # Stage 2: 运行环境（Python 3.11 + MariaDB + Nginx + FFmpeg + Supervisor）
-FROM python:3.11-slim-bullseye AS runtime
+# 用 Debian bookworm(12) — bullseye(11) 的 apt 源已归档，mariadb/nginx 包 404
+FROM python:3.11-slim-bookworm AS runtime
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
