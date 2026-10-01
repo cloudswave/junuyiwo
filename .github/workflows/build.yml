@@ -1,0 +1,33 @@
+name: Build Docker image
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          load: true
+          tags: junuyiwo:gha-build
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # 限制 Docker 内存，避免 GitHub Actions 内存不足（小机器/容器会 OOM）
+          build-args: |
+            DEBIAN_FRONTEND=noninteractive
