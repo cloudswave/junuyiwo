@@ -8,11 +8,13 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
   mysqld --daemonize --user=mysql
   sleep 3
   mysql -u root -e "CREATE DATABASE IF NOT EXISTS junyi_word CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+  # 设置 root 密码与后端默认 DB_PASSWORD=123456 一致
+  mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '123456'; FLUSH PRIVILEGES;"
   for f in /app/sql/migration_*.sql; do
     echo ">> applying $(basename $f)"
-    mysql -u root junyi_word < "$f" 2>/dev/null || true
+    mysql -u root -p123456 junyi_word < "$f" 2>/dev/null || true
   done
-  mysqladmin shutdown
+  mysqladmin -u root -p123456 shutdown
   sleep 2
 else
   echo ">> MariaDB data exists, skipping init"
@@ -27,7 +29,7 @@ MYSQL_PID=$!
 
 # 等待 MariaDB 就绪
 for i in $(seq 1 60); do
-  if mysqladmin ping --silent 2>/dev/null; then
+  if mysqladmin -u root -p123456 ping --silent 2>/dev/null; then
     echo ">> MariaDB ready"
     break
   fi

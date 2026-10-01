@@ -1,9 +1,9 @@
 import axios from 'axios'
 
-// 开发模式用 Vite proxy (/api -> 127.0.0.1:8000)，生产模式(APK)用局域网 IP
-// 每个位置在 frontend/.env 中配置 VITE_API_HOST（不提交到 git）
-const API_HOST = import.meta.env.VITE_API_HOST || 'http://192.168.1.4:8000'
-const baseURL = import.meta.env.DEV ? '/api' : `${API_HOST}/api`
+// 开发模式用 Vite proxy (/api -> 127.0.0.1:8000)，生产默认同源 /api（nginx 反代）
+// APK 场景可在 frontend/.env 配置 VITE_API_HOST 覆盖（如 http://192.168.1.4:8000）
+const API_HOST = import.meta.env.VITE_API_HOST
+const baseURL = import.meta.env.DEV ? '/api' : (API_HOST ? `${API_HOST}/api` : '/api')
 
 const api = axios.create({
   baseURL,

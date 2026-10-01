@@ -4,9 +4,9 @@ import { PrinterOutlined, ExpandOutlined, SoundOutlined, EditOutlined, PauseCirc
 import type { PinyinToken, RecentCharInfo } from '../services/api'
 import { charactersApi, behaviorApi, articlesApi, readStatusApi, curiosityApi, feedbackApi } from '../services/api'
 
-// 开发模式用相对路径（Vite proxy），APK 用局域网地址（在 frontend/.env 配置 VITE_API_HOST）
-const API_HOST = import.meta.env.VITE_API_HOST || 'http://192.168.1.4:8000'
-const API_BASE = import.meta.env.DEV ? '' : API_HOST
+// 开发模式用相对路径（Vite proxy），生产默认同源相对路径，APK 用 VITE_API_HOST 覆盖
+const API_HOST = import.meta.env.VITE_API_HOST
+const API_BASE = import.meta.env.DEV ? '' : (API_HOST || '')
 
 // 点字发声：浏览器端音频缓存（Blob URL），避免每次 HTTP 请求
 const audioBlobCache = new Map<string, string>()

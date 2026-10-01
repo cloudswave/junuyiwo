@@ -5,7 +5,7 @@ WORKDIR /frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
 COPY frontend/ ./
-# 生产模式 API 走相对路径（nginx 反代同一容器）
+# 生产模式默认同源 /api（nginx 反代），APK 场景可在 frontend/.env 配置 VITE_API_HOST
 RUN npm run build
 
 # Stage 2: 运行环境（Python 3.11 + MariaDB + Nginx + FFmpeg + Supervisor）

@@ -23,9 +23,9 @@ import {
 } from '@ant-design/icons'
 import { studentsApi, curiosityApi, asrApi, zonesApi, knowledgeBaseApi, type StudentResponse, type ReadingLevelResponse } from '../services/api'
 
-// 图片路径：APK 生产模式需补全绝对路径（在 frontend/.env 配置 VITE_API_HOST）
-const API_HOST = import.meta.env.VITE_API_HOST || 'http://192.168.1.4:8000'
-const IMG_BASE = import.meta.env.DEV ? '' : API_HOST
+// 图片路径：生产默认同源相对路径（nginx 托管静态），APK 用 VITE_API_HOST 覆盖
+const API_HOST = import.meta.env.VITE_API_HOST
+const IMG_BASE = import.meta.env.DEV ? '' : (API_HOST || '')
 const resolveImg = (path: string) => path.startsWith('http') ? path : IMG_BASE + path
 
 const { Header, Sider, Content } = Layout
