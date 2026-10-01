@@ -124,12 +124,19 @@ class ActLayer:
             resp = client.chat.completions.create(
                 model=DEEPSEEK_MODEL,
                 messages=[{"role": "system", "content": system}, {"role": "user", "content": p}],
-                temperature=0.8, max_tokens=4096,
+                temperature=0.8, max_tokens=8192,
             )
-            return resp.choices[0].message.content.strip()
+            return (resp.choices[0].message.content or "").strip()
 
         try:
             content = _call(prompt)
+            # DeepSeek 推理模型偶发返回空 content，自动重试（最多2次）
+            for attempt in range(2):
+                if content:
+                    break
+                logger.warning(f"DeepSeek returned empty content, retry {attempt+1}")
+                content = _call(prompt)
+
             if not content:
                 raise RuntimeError("DeepSeek returned empty content")
 

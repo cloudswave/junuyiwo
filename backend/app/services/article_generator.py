@@ -225,9 +225,9 @@ def generate_raw_article(topic: str, characters: list[str], min_chars: int = 300
         response = client.chat.completions.create(
             model=DEEPSEEK_MODEL,
             messages=[{"role": "system", "content": s}, {"role": "user", "content": p}],
-            temperature=0.8, max_tokens=4096,
+            temperature=0.8, max_tokens=8192,
         )
-        return response.choices[0].message.content.strip()
+        return (response.choices[0].message.content or "").strip()
 
     try:
         content = _call_deepseek(prompt, system_msg)
