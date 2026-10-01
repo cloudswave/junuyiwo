@@ -8,8 +8,9 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
   mysqld --daemonize --user=mysql
   sleep 3
   mysql -u root -e "CREATE DATABASE IF NOT EXISTS junyi_word CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
-  # 设置 root 密码与后端默认 DB_PASSWORD=123456 一致
+  # 设置 root 密码与后端默认 DB_PASSWORD=123456 一致（socket + TCP 两个 host）
   mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '123456'; FLUSH PRIVILEGES;"
+  mysql -u root -e "CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY '123456'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1'; FLUSH PRIVILEGES;"
   for f in /app/sql/migration_*.sql; do
     echo ">> applying $(basename $f)"
     mysql -u root -p123456 junyi_word < "$f" 2>/dev/null || true
